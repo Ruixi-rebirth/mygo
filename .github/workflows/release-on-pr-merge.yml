@@ -1,0 +1,44 @@
+name: Release on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  release-on-merge:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "stable"
+
+      - name: Build binaries
+        run: |
+          GOOS=darwin GOARCH=amd64 go build -o builds/mygo-mac-amd64 ./main.go
+          GOOS=darwin GOARCH=arm64 go build -o builds/mygo-mac-arm64 ./main.go
+          GOOS=linux GOARCH=amd64 go build -o builds/mygo-linux-amd64 ./main.go
+          GOOS=linux GOARCH=arm64 go build -o builds/mygo-linux-arm64 ./main.go
+          GOOS=windows GOARCH=amd64 go build -o builds/mygo-win-amd64.exe ./main.go
+
+      - name: Create Git Tag
+        run: |
+          TAG_NAME=v$(date +'%Y%m%d%H%M%S')
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          git config user.name 'GitHub Actions'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
+
+      - name: Create and Upload Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: builds/*
+          tag_name: ${{ env.TAG_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
