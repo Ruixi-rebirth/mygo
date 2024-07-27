@@ -57,6 +57,6 @@ func findProjectRoot() (string, error) {
 // ValidateInput checks if the input meets naming conventions
 func ValidateInput(input string) bool {
 	// Check if input matches naming conventions (allow alphanumeric, underscores, and slashes)
-	isValid := regexp.MustCompile(`^[a-zA-Z0-9_/]+$`).MatchString
+	isValid := regexp.MustCompile(`^[a-zA-Z0-9_./]+$`).MatchString
 	return isValid(input)
 }
