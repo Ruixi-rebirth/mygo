@@ -1,0 +1,38 @@
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Fix vendorHash
+        run: |
+          HASH=$(nix build 2>&1 | grep -oP 'got:\s+\Ksha256-[A-Za-z0-9+/=]+' || true)
+          if [ -n "$HASH" ]; then
+            sed -i "s|vendorHash = \".*\"|vendorHash = \"$HASH\"|" flake.nix
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add flake.nix
+            git commit -m "chore: update vendorHash"
+            git push
+          fi
+
+      - name: Approve and enable auto-merge
+        run: |
+          gh pr review "$PR_URL" --approve
+          gh pr merge "$PR_URL" --auto --squash
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

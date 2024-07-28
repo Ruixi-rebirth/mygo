@@ -1,0 +1,30 @@
+[project]
+name = "mygo"
+version = "0.2.0"
+description = "A Cargo-like build tool and package manager for Go projects"
+authors = ["Ruixi-rebirth"]
+license = "MIT"
+repository = "https://github.com/Ruixi-rebirth/mygo"
+go-version = "1.22"
+
+[build]
+out-dir = "."
+ldflags = "-s -w"
+
+[profile.release]
+ldflags = "-s -w"
+env = { CGO_ENABLED = "0" }
+
+[profile.dev]
+env = { CGO_ENABLED = "0" }
+
+[test]
+timeout = "60s"
+race = false
+
+[lint]
+tool = "golangci-lint"
+
+[bench]
+count = 3
+benchmem = true

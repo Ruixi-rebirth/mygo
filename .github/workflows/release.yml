@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Build with nix
+        run: nix build
+
+      - name: Package artifacts
+        run: |
+          mkdir -p dist
+          cp result/bin/mygo dist/mygo-linux-amd64
+          cd dist && tar czf mygo-linux-amd64.tar.gz mygo-linux-amd64 && sha256sum mygo-linux-amd64.tar.gz > mygo-linux-amd64.tar.gz.sha256
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
