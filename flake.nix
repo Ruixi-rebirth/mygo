@@ -36,7 +36,7 @@
             version = "git";
             src = ./.;
             subPackages = [ "cmd/mygo" ];
-            vendorHash = "sha256-7nE5Jkn/ItezXMQKHRKuPE5wztvPcDDeH4UF39OMyj0=";
+            vendorHash = "sha256-2T772sGm1OBeJNo4xR2wS9tKUjGsJKX5lTQh4YNubVo=";
             nativeBuildInputs = [ pkgs.installShellFiles ];
             postInstall = ''
               installShellCompletion --cmd mygo \
